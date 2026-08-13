@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  RECEIVED
+  CONFIRMED
+  PREPARING
+  DELAYED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+  FAILED_DELIVERY
+}
+
+model MenuItem {
+  id          String      @id @default(cuid())
+  name        String
+  description String
+  // Price stored in cents (integer) rather than a float/decimal to avoid
+  // rounding errors when summing cart totals.
+  priceCents  Int
+  imageUrl    String
+  category    String
+  isAvailable Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  orderItems  OrderItem[]
+
+  @@index([category])
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  customerName  String
+  address       String
+  phone         String
+  status        OrderStatus @default(RECEIVED)
+
+  // Drives the time-computed status engine: the timestamp status last
+  // changed, and the timestamp after which this order becomes eligible to
+  // advance to its next state. Recomputed lazily on read instead of via a
+  // background worker (see /lib/order-status-engine.ts for why).
+  statusChangedAt DateTime  @default(now())
+  nextEligibleAt  DateTime  @default(now())
+
+  items         OrderItem[]
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([status])
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId    String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  menuItemId String
+  quantity   Int
+  // Snapshot of the item's price at the moment it was ordered, so later
+  // menu price changes never retroactively alter a past order's total.
+  unitPriceCents Int
+
+  @@index([orderId])
+}

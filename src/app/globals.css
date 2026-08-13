@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #132a2e;
+  --foreground: #faf3e4;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Perforated top edge on ticket-style cards, built from a repeating
+     radial gradient "bite" out of the card rather than an image asset. */
+  .ticket-notch {
+    -webkit-mask-image: radial-gradient(
+      circle at 8px 0px,
+      transparent 6px,
+      black 6.5px
+    );
+    -webkit-mask-size: 16px 100%;
+    -webkit-mask-repeat: repeat-x;
+    -webkit-mask-position: top;
+    mask-image: radial-gradient(circle at 8px 0px, transparent 6px, black 6.5px);
+    mask-size: 16px 100%;
+    mask-repeat: repeat-x;
+    mask-position: top;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: #6b9080 transparent;
+  }
+}
+
+/* Visible keyboard focus everywhere, per accessibility floor. */
+:focus-visible {
+  outline: 2px solid #f2a93b;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
