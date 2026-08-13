@@ -80,4 +80,30 @@ describe("API routes", () => {
     const body = await res.json();
     expect(body.order.status).toBe("CANCELLED");
   });
+
+  it("GET /api/orders returns an empty list when no orders exist", async () => {
+    const { GET } = await import("@/app/api/orders/route");
+    const res = await GET();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.orders).toEqual([]);
+  });
+
+  it("GET /api/orders returns every order that has been placed", async () => {
+    const { POST, GET } = await import("@/app/api/orders/route");
+    const payload = {
+      customerName: "Aman Sharma",
+      address: "221B Residency Rd, Indore",
+      phone: "+91 98765 43210",
+      items: [{ menuItemId: "menu_margherita", quantity: 1 }],
+    };
+    await POST(new Request("http://localhost/api/orders", { method: "POST", body: JSON.stringify(payload) }));
+    await POST(new Request("http://localhost/api/orders", { method: "POST", body: JSON.stringify(payload) }));
+
+    const res = await GET();
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.orders).toHaveLength(2);
+    expect(body.orders.every((o: { status: string }) => o.status === "RECEIVED")).toBe(true);
+  });
 });

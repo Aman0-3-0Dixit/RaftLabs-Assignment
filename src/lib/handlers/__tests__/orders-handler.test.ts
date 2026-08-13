@@ -15,7 +15,7 @@ describe("createOrder", () => {
     repo = new InMemoryOrderRepository(MENU_SEED);
   });
 
-  it("creates an order and snapshots the current menu price per item", async () => {
+it("creates an order and snapshots the current menu price per item", async () => {
     const order = await createOrder(repo, {
       customerName: "Aman Sharma",
       address: "221B Residency Rd, Indore",
@@ -26,6 +26,41 @@ describe("createOrder", () => {
     expect(order.items).toHaveLength(1);
     expect(order.items[0].unitPriceCents).toBe(129900);
     expect(order.items[0].quantity).toBe(2);
+  });
+
+  it("prices a cart with multiple distinct items correctly, each against its own menu price", async () => {
+    const order = await createOrder(repo, {
+      customerName: "Aman Sharma",
+      address: "221B Residency Rd, Indore",
+      phone: "+91 98765 43210",
+      items: [
+        { menuItemId: "menu_margherita", quantity: 2 }, // 129900 each
+        { menuItemId: "menu_classic_burger", quantity: 1 }, // 89900
+        { menuItemId: "menu_lemonade", quantity: 3 }, // 34900 each
+      ],
+    });
+    expect(order.items).toHaveLength(3);
+
+    const total = order.items.reduce((sum, i) => sum + i.quantity * i.unitPriceCents, 0);
+    expect(total).toBe(2 * 129900 + 1 * 89900 + 3 * 34900);
+
+    const burgerLine = order.items.find((i) => i.menuItemId === "menu_classic_burger");
+    expect(burgerLine?.unitPriceCents).toBe(89900);
+    expect(burgerLine?.quantity).toBe(1);
+  });
+
+  it("rejects the whole order if even one item among several is unknown", async () => {
+    await expect(
+      createOrder(repo, {
+        customerName: "Aman Sharma",
+        address: "221B Residency Rd, Indore",
+        phone: "+91 98765 43210",
+        items: [
+          { menuItemId: "menu_margherita", quantity: 1 },
+          { menuItemId: "menu_does_not_exist", quantity: 1 },
+        ],
+      })
+    ).rejects.toMatchObject({ status: 400 });
   });
 
   it("rejects a payload with a missing customer name", async () => {
