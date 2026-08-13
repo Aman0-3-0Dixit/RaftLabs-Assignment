@@ -13,7 +13,7 @@ export function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () =
       <div
         onClick={onClose}
         aria-hidden
-        className={`fixed inset-0 z-40 bg-black/50 transition-opacity ${
+        className={`fixed inset-0 z-[9998] bg-black/50 transition-opacity ${
           isOpen ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
       />
@@ -21,7 +21,7 @@ export function CartDrawer({ isOpen, onClose }: { isOpen: boolean; onClose: () =
         role="dialog"
         aria-modal="true"
         aria-label="Your cart"
-        className={`fixed right-0 top-0 z-50 flex h-full w-full max-w-sm transform flex-col bg-rail-paper text-rail-ink shadow-ticket transition-transform duration-300 ${
+        className={`fixed right-0 top-0 z-[9999] flex h-full w-full max-w-sm transform flex-col bg-rail-paper text-rail-ink shadow-ticket transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
