@@ -24,7 +24,7 @@ describe("createOrder", () => {
     });
     expect(order.status).toBe("RECEIVED");
     expect(order.items).toHaveLength(1);
-    expect(order.items[0].unitPriceCents).toBe(1299);
+    expect(order.items[0].unitPriceCents).toBe(129900);
     expect(order.items[0].quantity).toBe(2);
   });
 
